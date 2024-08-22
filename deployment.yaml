@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-playground
+  namespace: react-project
+  labels:
+    app: react-playground
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-playground
+  template:
+    metadata:
+      name: react-playground
+      labels:
+        app: react-playground
+    spec:
+      containers:
+      - image: react-playground:1.0
+        name: react-playground
+        imagePullPolicy: IfNotPresent
+        volumeMounts: 
+        - name: react-playground-nginx-config
+          mountPath: /etc/nginx/conf.d/react-playground.conf
+          subPath: react-playground.conf
+      volumes:
+      - name: react-playground-nginx-config
+        configMap:
+          name: react-playground-nginx-config
+          items:
+          - key: react-playground.conf
+            path:  react-playground.conf
+           
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-playground-service
+  namespace: react-project
+spec:
+  type: NodePort
+  selector:
+    app: react-playground
+  ports: 
+  - name: react-playground-service
+    protocol: TCP
+    port: 9000
+    targetPort: 9000
+    nodePort: 30313
+
